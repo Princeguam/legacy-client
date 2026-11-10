@@ -1,0 +1,102 @@
+/* Full-viewport login; the white-panel watermark follows temp.png, Graphic Language 04. */
+.auth-page {
+  width: 100%;
+  min-height: 100svh;
+  background: var(--lwc-color-surface-default);
+  color: var(--lwc-color-text-primary);
+}
+.auth-shell {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  width: 100%;
+  min-height: 100svh;
+}
+.auth-content {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  padding: var(--lwc-space-32);
+  background: var(--lwc-color-surface-default);
+}
+.auth-header, .auth-main, .auth-footer {
+  position: relative;
+  z-index: 1;
+}
+.auth-header {
+  display: flex;
+  align-items: center;
+  min-height: var(--lwc-space-64);
+}
+.auth-main {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  padding-block: var(--lwc-space-48);
+}
+.auth-footer { padding-top: var(--lwc-space-16); }
+.auth-brand-panel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  padding: var(--lwc-space-48) var(--lwc-space-32);
+  background: var(--lwc-color-action-default);
+  color: var(--lwc-color-action-on);
+}
+.auth-watermark-tree {
+  -webkit-mask: url('/brand/legacy-tree.png') center / contain no-repeat;
+  mask: url('/brand/legacy-tree.png') center / contain no-repeat;
+  aspect-ratio: 170 / 192;
+}
+.auth-hand-illustration {
+  display: block;
+  width: 100%;
+  max-width: calc(var(--lwc-dimension-content-max) / 2);
+  height: auto;
+  max-height: calc(100svh - var(--lwc-space-96));
+  object-fit: contain;
+}
+.auth-watermark {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+  user-select: none;
+}
+.auth-watermark-strip {
+  position: absolute;
+  bottom: calc(-1 * var(--lwc-space-48));
+  left: -8%;
+  display: flex;
+  width: 112%;
+}
+.auth-watermark-tree {
+  flex: 0 0 25%;
+  background: var(--lwc-color-secondary-default);
+  opacity: 0.24;
+}
+.auth-watermark-tree:nth-child(2) { opacity: 0.32; }
+.auth-watermark-tree:nth-child(3) { opacity: 0.4; }
+@media (min-width: 1600px) {
+  .auth-content { padding: var(--lwc-space-48); }
+}
+@media (max-width: 959px) {
+  .auth-shell { grid-template-columns: minmax(0, 1fr); }
+  .auth-brand-panel { display: none; }
+  .auth-content { padding: var(--lwc-space-24); }
+}
+@media (max-width: 599px) {
+  .auth-content { padding: var(--lwc-space-24) var(--lwc-grid-margin); }
+  .auth-main { padding-block: var(--lwc-space-40); }
+  .auth-watermark-strip { bottom: calc(-1 * var(--lwc-space-16)); }
+}
+@media (forced-colors: active) {
+  .auth-brand-panel { border-left: 1px solid CanvasText; }
+  .auth-watermark { display: none; }
+  .auth-hand-illustration { display: none; }
+}

@@ -1,0 +1,23 @@
+.receipt-picker { display: grid; gap: var(--lwc-space-16); min-height: calc(var(--lwc-space-128) + var(--lwc-space-32)); padding: var(--lwc-space-24); border: 1px dashed var(--lwc-color-border-control); border-radius: var(--lwc-radius-8); align-content: center; background: var(--lwc-color-surface-raised); }
+.receipt-picker input[type='file'] { width: 100%; min-width: 0; height: auto; min-height: var(--lwc-dimension-target-min); padding: var(--lwc-space-8); }
+.receipt-picker input::file-selector-button { min-height: var(--lwc-dimension-target-min); margin-right: var(--lwc-space-8); padding: var(--lwc-space-8) var(--lwc-space-16); border: 1px solid var(--lwc-color-border-control); border-radius: var(--lwc-radius-8); background: var(--lwc-color-secondary-default); color: var(--lwc-color-secondary-on); font: inherit; cursor: pointer; }
+.receipt-preview { display: grid; gap: var(--lwc-space-16); min-width: 0; padding: var(--lwc-space-16); border: 1px solid var(--lwc-color-border-subtle); border-radius: var(--lwc-radius-8); }
+.receipt-thumbnail { display: block; width: 100%; max-height: calc(var(--lwc-space-128) * 2); object-fit: contain; border-radius: var(--lwc-radius-4); }
+.receipt-file { display: flex; align-items: flex-start; gap: var(--lwc-space-16); min-height: var(--lwc-space-64); }
+.receipt-file > svg { flex-shrink: 0; }
+.receipt-file > div { min-width: 0; }
+.receipt-name, .transaction-notes { overflow-wrap: anywhere; }
+.transaction-notes { white-space: pre-wrap; margin-top: var(--lwc-space-16); }
+.transaction-draft-list { list-style: none; padding: 0; margin: 0; }
+.transaction-draft-list li { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--lwc-space-16); padding-block: var(--lwc-space-16); border-top: 1px solid var(--lwc-color-border-subtle); }
+.transaction-draft-list li > div:first-child { flex: 1 1 var(--lwc-space-128); min-width: 0; overflow-wrap: anywhere; }
+.transaction-draft-list li > .financial { overflow-wrap: anywhere; }
+@media (max-width: 599px) {
+  .receipt-picker { padding: var(--lwc-space-16); }
+  .transaction-draft-list li { display: grid; grid-template-columns: minmax(0, 1fr); }
+  .transaction-draft-list li > .financial { text-align: left; }
+}
+@media (forced-colors: active) {
+  .receipt-picker, .receipt-preview, .transaction-draft-list li { border-color: CanvasText; }
+  .receipt-picker input::file-selector-button { background: ButtonFace; color: ButtonText; border-color: ButtonText; }
+}

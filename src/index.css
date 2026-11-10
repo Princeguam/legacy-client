@@ -1,0 +1,81 @@
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400&display=swap');
+@import 'tailwindcss';
+@import './design-system/tokens.css';
+@import './design-system/components.css';
+@import './design-system/motion.css';
+
+@font-face {
+  font-family: 'Inter'; font-style: normal; font-weight: 100 900; font-display: swap;
+  src: url('/fonts/inter-latin-wght-normal.woff2') format('woff2');
+}
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+@theme inline {
+  --font-sans: var(--lwc-font-interface);
+  --font-mono: var(--lwc-font-financial);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --radius-sm: var(--lwc-radius-4);
+  --radius-md: var(--lwc-radius-8);
+  --radius-lg: var(--lwc-radius-12);
+  --radius-xl: var(--lwc-radius-16);
+  --breakpoint-*: initial;
+  --breakpoint-sm: 600px;
+  --breakpoint-md: 960px;
+  --breakpoint-lg: 1280px;
+  --breakpoint-xl: 1600px;
+}
+@layer base {
+  * { box-sizing: border-box; border-color: var(--border); }
+  html { font-size: 100%; scroll-behavior: auto; scroll-padding-top: 6rem; }
+  body { margin: 0; background: var(--background); color: var(--foreground); font-family: var(--lwc-font-interface); font-size: 1rem; line-height: 1.5; font-synthesis: none; -webkit-font-smoothing: antialiased; }
+  #root { min-height: 100svh; }
+  h1, h2, h3, h4, p { margin: 0; }
+  h1 { font-size: var(--lwc-type-hero-size); line-height: var(--lwc-type-hero-line); font-weight: 300; }
+  h2 { font-size: var(--lwc-type-section-size); line-height: 1.25; font-weight: 300; }
+  h3 { font-size: var(--lwc-type-title-size); line-height: 1.4; font-weight: 500; }
+  button, input, textarea, select { font: inherit; }
+  button { cursor: pointer; }
+  :focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; box-shadow: 0 0 0 2px var(--lwc-color-surface-default); }
+  input::placeholder, textarea::placeholder { color: var(--lwc-color-text-muted); opacity: 1; }
+  a { color: var(--lwc-color-text-primary); text-underline-offset: 4px; }
+  a:hover { text-decoration-thickness: 2px; }
+  ::selection { color: var(--lwc-color-text-primary); background: var(--lwc-color-selection-default); }
+}
+.financial { font-family: var(--lwc-font-financial); font-weight: 400; font-variant-numeric: tabular-nums; letter-spacing: 0; }
+.skip-link { position: fixed; inset: 1rem auto auto 1rem; z-index: 100; padding: 1rem; border-radius: 8px; background: var(--card); transform: translateY(-200%); }
+.skip-link:focus { transform: none; }
+.page-container { width: 100%; max-width: calc(100rem + 2 * var(--lwc-grid-margin)); margin-inline: auto; padding-inline: var(--lwc-grid-margin); }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition-duration: 0ms !important; scroll-behavior: auto !important; }
+  *:not(.skip-link) { transform: none !important; }
+}
+@media (forced-colors: active) {
+  :focus-visible { outline-color: Highlight; }
+  button, input, select, textarea, dialog { border: 1px solid ButtonText; }
+  .badge, .alert { border: 1px solid CanvasText; }
+  .choice-input:checked, .choice-input:indeterminate, .switch-input:checked { background: Highlight; border-color: Highlight; }
+  .choice-mark { color: HighlightText; }
+  .switch-input:checked + .switch-thumb { background: HighlightText; }
+  .progress-track, .progress-fill { forced-color-adjust: none; }
+  .progress-track { background: Canvas; border: 1px solid CanvasText; }
+  .progress-fill { background: Highlight; }
+}

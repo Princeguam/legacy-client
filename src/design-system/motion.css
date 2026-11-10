@@ -1,0 +1,49 @@
+/* Runtime treatments use approved timing, easing, spacing, and the original tree. */
+.card-watermark { position: relative; isolation: isolate; overflow: hidden; }
+.card-watermark::after {
+  content: ''; position: absolute; z-index: -1; pointer-events: none;
+  right: calc(-1 * var(--lwc-space-16)); bottom: calc(-1 * var(--lwc-space-24));
+  width: var(--lwc-space-128); height: calc(var(--lwc-space-128) + var(--lwc-space-16));
+  background: var(--lwc-color-action-default); opacity: 0.08;
+  mask: url('/brand/legacy-tree.png') center / contain no-repeat;
+}
+.logo-page-loader.route-loading { min-height: calc(var(--lwc-space-128) * 2 + var(--lwc-space-64)); display: grid; place-items: center; padding: var(--lwc-space-24); }
+.logo-page-loader.full-page-loader { min-height: 100svh; background: var(--lwc-color-background-canvas); }
+.page-loader-tree {
+  width: var(--lwc-space-80); height: var(--lwc-space-96);
+  background: var(--lwc-brand-700);
+  mask: url('/brand/legacy-tree.png') center / contain no-repeat;
+  animation: logo-reveal var(--lwc-duration-complex) var(--lwc-ease-enter) both;
+}
+[data-theme='dark'] .page-loader-tree { background: var(--lwc-brand-50); }
+.page-entry { min-width: 0; animation: page-reveal var(--lwc-duration-enter) var(--lwc-ease-enter) both; }
+.currency-value { display: inline-block; max-width: 100%; overflow-wrap: anywhere; animation: amount-reveal var(--lwc-duration-complex) var(--lwc-ease-enter) both; }
+.summary-number { animation: amount-reveal var(--lwc-duration-complex) var(--lwc-ease-enter) both; }
+.chart-line[pathLength] { stroke-dasharray: 1; animation: chart-reveal var(--lwc-duration-complex) var(--lwc-ease-standard) both; }
+.chart-point { animation: amount-reveal var(--lwc-duration-complex) var(--lwc-ease-enter) both; }
+.progress-fill { transition: width var(--lwc-duration-standard) var(--lwc-ease-standard); }
+.progress-fill, .allocation-bar { animation: amount-reveal var(--lwc-duration-complex) var(--lwc-ease-enter) both; }
+.ui-dialog[open], .notifications-popover, .chart-data-toggle + .table-region { animation: page-reveal var(--lwc-duration-enter) var(--lwc-ease-enter) both; }
+.mobile-navigation-drawer[open] { animation: drawer-reveal var(--lwc-duration-enter) var(--lwc-ease-enter) both; }
+.ui-dialog[open]::backdrop, .mobile-navigation-drawer[open]::backdrop { animation: amount-reveal var(--lwc-duration-enter) var(--lwc-ease-enter) both; }
+.ui-button, .action-link, .sidebar-link, .mobile-menu-link, .segment-group button {
+  transition: background-color var(--lwc-duration-fast) var(--lwc-ease-standard), color var(--lwc-duration-fast) var(--lwc-ease-standard), opacity var(--lwc-duration-fast) var(--lwc-ease-standard);
+}
+.ui-button:not(:disabled):not([aria-busy='true']):active > span:first-child, .action-link:active > svg { opacity: 0.8; }
+@keyframes page-reveal { from { opacity: 0; transform: translateY(var(--lwc-space-8)); } to { opacity: 1; transform: none; } }
+@keyframes amount-reveal { from { opacity: 0.24; } to { opacity: 1; } }
+@keyframes logo-reveal { from { opacity: 0.16; } to { opacity: 1; } }
+@keyframes drawer-reveal { from { opacity: 0; transform: translateX(calc(-1 * var(--lwc-space-8))); } to { opacity: 1; transform: none; } }
+@keyframes chart-reveal { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
+@media (prefers-reduced-motion: reduce) {
+  .page-entry, .currency-value, .summary-number, .chart-point, .progress-fill, .allocation-bar, .page-loader-tree,
+  .ui-dialog[open], .mobile-navigation-drawer[open], .notifications-popover, .chart-data-toggle + .table-region {
+    animation: none; opacity: 1; transform: none;
+  }
+  .chart-line[pathLength] { animation: none; stroke-dasharray: none; stroke-dashoffset: 0; }
+}
+@media (forced-colors: active) {
+  .card-watermark::after { display: none; }
+  .page-loader-tree { forced-color-adjust: none; background: CanvasText; }
+  [data-theme='dark'] .page-loader-tree { background: CanvasText; }
+}
