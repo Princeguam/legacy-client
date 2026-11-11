@@ -4,7 +4,7 @@ import { readFile, writeFile } from "node:fs/promises";
 const base = new URL("../src/design-system/", import.meta.url);
 const tokens = JSON.parse(await readFile(new URL("tokens.json", base), "utf8"));
 const guide = await readFile(
-    new URL("../Legacy Wealth Design System/Agent Guide.md", import.meta.url),
+    new URL("../docs/design-system/agent-guide.md", import.meta.url),
     "utf8",
 );
 const check = process.argv.includes("--check");
