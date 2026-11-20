@@ -1,4 +1,4 @@
-import { API_MESSAGES, API_PATHS, MIME_TYPES } from "@/constants/strings";
+import { API_MESSAGES, MIME_TYPES } from "@/constants/strings";
 import { API_REQUEST_TIMEOUT_MS } from "@/constants/values";
 import type { ApiRequestOptions } from "@/types/api";
 import { isApiResponse } from "./apiResponse";
@@ -35,8 +35,13 @@ export async function requestApi<T>(
     const baseUrl = (
         import.meta.env.API_ENV === "prod"
             ? import.meta.env.VITE_API_PROD_URL
-            : import.meta.env.VITE_API_DEV_URL || API_PATHS.base
+            : import.meta.env.VITE_API_DEV_URL
     ).replace(/\/$/, "");
+
+    console.log(baseUrl);
+    console.log("Environment: ", import.meta.env.API_ENV);
+    console.log("Prod Url: ", import.meta.env.VITE_API_PROD_URL);
+    console.log("Dev Url: ", import.meta.env.VITE_API_DEV_URL);
     try {
         const response = await fetch(`${baseUrl}${path}`, {
             method: options.method ?? "GET",
