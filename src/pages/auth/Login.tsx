@@ -1,9 +1,9 @@
 import { notify } from "@/lib/notify";
 import type { LoginErrors } from "@/types/Auth";
-import { AUTH_MESSAGES, ROUTES } from "@/constants/strings";
+import { AUTH_MESSAGES } from "@/constants/strings";
 import { useRef, useState, type FormEvent } from "react";
 import { Eye, EyeOff } from "lucide-react";
-import { Link } from "react-router-dom";
+// import { Link } from "react-router-dom";
 import { Button, IconButton } from "@/components/shared/Button";
 import { Modal } from "@/components/shared/Modal";
 import { FormField } from "@/components/shared/form-field/form-field";
@@ -166,11 +166,11 @@ export function Login() {
                         </button>
                     </p>
                 </>
-                <p className="login-preview-link type-label">
+                {/* <p className="login-preview-link type-label">
                     <Link className="auth-text-action" to={ROUTES.preview}>
                         Explore illustrative page previews
                     </Link>
-                </p>
+                </p> */}
             </div>
             <Modal
                 open={help !== null}
