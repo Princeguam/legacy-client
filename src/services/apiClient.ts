@@ -33,7 +33,7 @@ export async function requestApi<T>(
     );
     const messages = options.messages ?? API_MESSAGES;
     const baseUrl = (
-        import.meta.env.VITE_ENV === "prod"
+        import.meta.env.API_ENV === "prod"
             ? import.meta.env.VITE_API_PROD_URL
             : import.meta.env.VITE_API_DEV_URL || API_PATHS.base
     ).replace(/\/$/, "");
