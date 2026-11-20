@@ -38,11 +38,11 @@ export async function requestApi<T>(
             : import.meta.env.VITE_API_DEV_URL
     ).replace(/\/$/, "");
 
-    console.log(baseUrl);
-    console.log("Environment: ", import.meta.env.API_ENV);
-    console.log("Prod Url: ", import.meta.env.VITE_API_PROD_URL);
-    console.log("Dev Url: ", import.meta.env.VITE_API_DEV_URL);
     try {
+        console.log(baseUrl);
+        console.log("Environment: ", import.meta.env.API_ENV);
+        console.log("Prod Url: ", import.meta.env.VITE_API_PROD_URL);
+        console.log("Dev Url: ", import.meta.env.VITE_API_DEV_URL);
         const response = await fetch(`${baseUrl}${path}`, {
             method: options.method ?? "GET",
             headers: {
