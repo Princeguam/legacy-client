@@ -32,17 +32,21 @@ export async function requestApi<T>(
         options.timeoutMs ?? API_REQUEST_TIMEOUT_MS,
     );
     const messages = options.messages ?? API_MESSAGES;
-    const baseUrl = (
-        import.meta.env.API_ENV === "prod"
-            ? import.meta.env.VITE_API_PROD_URL
-            : import.meta.env.VITE_API_DEV_URL
-    ).replace(/\/$/, "");
+
+    const production = import.meta.env.VITE_API_ENV === "prod";
+
+    const url = production
+        ? import.meta.env.VITE_API_PROD_URL
+        : import.meta.env.VITE_API_DEV_URL;
+
+    if (!url) {
+        throw new ApiError(
+            `Missing ${production ? "VITE_API_PROD_URL" : "VITE_API_DEV_URL"}`,
+        );
+    }
+    const baseUrl = url.replace(/\/$/, "");
 
     try {
-        console.log(baseUrl);
-        console.log("Environment: ", import.meta.env.API_ENV);
-        console.log("Prod Url: ", import.meta.env.VITE_API_PROD_URL);
-        console.log("Dev Url: ", import.meta.env.VITE_API_DEV_URL);
         const response = await fetch(`${baseUrl}${path}`, {
             method: options.method ?? "GET",
             headers: {
