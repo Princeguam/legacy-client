@@ -21,15 +21,21 @@ export async function requestApi<T>(
     options: ApiRequestOptions,
     parseData: (data: unknown) => T,
 ): Promise<T> {
-    if (options.body !== undefined && options.formData) throw new ApiError(API_MESSAGES.unavailable);
+    if (options.body !== undefined && options.formData)
+        throw new ApiError(API_MESSAGES.unavailable);
     const controller = new AbortController();
     const cancel = () => controller.abort();
     if (options.signal?.aborted) cancel();
     options.signal?.addEventListener("abort", cancel, { once: true });
-    const timeout = setTimeout(cancel, options.timeoutMs ?? API_REQUEST_TIMEOUT_MS);
+    const timeout = setTimeout(
+        cancel,
+        options.timeoutMs ?? API_REQUEST_TIMEOUT_MS,
+    );
     const messages = options.messages ?? API_MESSAGES;
     const baseUrl = (
-        import.meta.env.VITE_API_BASE_URL || API_PATHS.base
+        import.meta.env.VITE_ENV === "prod"
+            ? import.meta.env.VITE_API_PROD_URL
+            : import.meta.env.VITE_API_DEV_URL || API_PATHS.base
     ).replace(/\/$/, "");
     try {
         const response = await fetch(`${baseUrl}${path}`, {
@@ -43,9 +49,11 @@ export async function requestApi<T>(
                     ? { Authorization: `Bearer ${options.accessToken}` }
                     : {}),
             },
-            ...(options.formData ? { body: options.formData } : options.body !== undefined
-                ? { body: JSON.stringify(options.body) }
-                : {}),
+            ...(options.formData
+                ? { body: options.formData }
+                : options.body !== undefined
+                  ? { body: JSON.stringify(options.body) }
+                  : {}),
             signal: controller.signal,
         });
         const payload: unknown = await response.json().catch(() => {
