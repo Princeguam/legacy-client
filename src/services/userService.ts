@@ -31,8 +31,8 @@ import type {
 import { parseTransaction, parseTransactionList } from "./transactionResponse";
 import { transactionCreateBody, transactionSearch } from "./transactionRequest";
 import { validAccountId } from "@/lib/transactions";
-import type { UpdatePasswordRequest } from '@/types/settings';
-import { PASSWORD_MESSAGES } from '@/constants/strings';
+import type { UpdatePasswordRequest } from "@/types/settings";
+import { PASSWORD_MESSAGES } from "@/constants/strings";
 
 function parseProfile(
     data: unknown,
@@ -54,15 +54,34 @@ function requireToken(accessToken: string) {
 }
 
 /** Both roles change their own password; never persist or trim credentials. */
-export async function updatePassword(accessToken: string, input: UpdatePasswordRequest, signal?: AbortSignal): Promise<null> {
+export async function updatePassword(
+    accessToken: string,
+    input: UpdatePasswordRequest,
+    signal?: AbortSignal,
+): Promise<null> {
     requireToken(accessToken);
-    if (typeof input.oldPassword !== 'string' || !input.oldPassword) throw new ApiError(PASSWORD_MESSAGES.currentRequired);
-    if (typeof input.newPassword !== 'string' || !input.newPassword) throw new ApiError(PASSWORD_MESSAGES.newRequired);
-    if (input.oldPassword === input.newPassword) throw new ApiError(PASSWORD_MESSAGES.different);
-    return requestApi(API_PATHS.password, { method: 'PUT', accessToken, body: { oldPassword: input.oldPassword, newPassword: input.newPassword }, signal }, data => {
-        if (data !== null) throw new ApiError(API_MESSAGES.unavailable);
-        return null;
-    });
+    if (typeof input.oldPassword !== "string" || !input.oldPassword)
+        throw new ApiError(PASSWORD_MESSAGES.currentRequired);
+    if (typeof input.newPassword !== "string" || !input.newPassword)
+        throw new ApiError(PASSWORD_MESSAGES.newRequired);
+    if (input.oldPassword === input.newPassword)
+        throw new ApiError(PASSWORD_MESSAGES.different);
+    return requestApi(
+        API_PATHS.password,
+        {
+            method: "PUT",
+            accessToken,
+            body: {
+                oldPassword: input.oldPassword,
+                newPassword: input.newPassword,
+            },
+            signal,
+        },
+        (data) => {
+            if (data !== null) throw new ApiError(API_MESSAGES.unavailable);
+            return null;
+        },
+    );
 }
 
 export async function getTransactions(
@@ -176,7 +195,11 @@ export async function updateProfile(
     return requestApi(
         API_PATHS.profile,
         { method: "PUT", accessToken, body, signal },
-        (data) => { const profile = parseProfile(data, account); assertProfileSaved(profile, body); return profile },
+        (data) => {
+            const profile = parseProfile(data, account);
+            assertProfileSaved(profile, body);
+            return profile;
+        },
     );
 }
 
