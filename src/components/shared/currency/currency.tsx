@@ -1,3 +1,4 @@
+import { APP_CURRENCY, APP_LOCALE } from '@/constants/strings'
 import type { ComponentProps } from "react";
 import { cn } from "@/lib/utils";
 import {
@@ -7,8 +8,8 @@ import {
 
 export function Currency({
     value,
-    currency = "NGN",
-    locale = "en-NG",
+    currency = APP_CURRENCY,
+    locale = APP_LOCALE,
     className,
     ...props
 }: ComponentProps<"span"> & {

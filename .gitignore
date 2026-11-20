@@ -23,6 +23,15 @@ dist-ssr
 *.sln
 *.sw?
 
-/docs
-/Legacy Wealth Design System
-/resources
+# Optional local source boards; the approved text guide lives in docs/design-system.
+/Legacy Wealth Design System/
+/resources/
+
+# Local secrets and agent/tool state. Keep the documented example environment.
+.env
+.env.*
+!.env.example
+/.agents/
+/.codex/
+/.aws/
+/backend templates

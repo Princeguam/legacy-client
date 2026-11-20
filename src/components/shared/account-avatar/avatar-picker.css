@@ -1,0 +1,25 @@
+.avatar-picker {
+  display: grid;
+  justify-items: center;
+  gap: var(--lwc-space-8);
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+
+.avatar-picker > .field {
+  justify-items: center;
+}
+
+.avatar-picker-trigger {
+  display: inline-flex;
+  padding: 0;
+  border: 0;
+  border-radius: var(--lwc-radius-999);
+  background: transparent;
+  cursor: pointer;
+}
+
+.avatar-picker-trigger:disabled {
+  cursor: wait;
+}
+

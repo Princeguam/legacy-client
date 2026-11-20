@@ -29,6 +29,8 @@
   align-items: center;
   min-height: var(--lwc-space-64);
 }
+/* The image-equivalent lockup keeps the approved 12px caption size while UI text resizes. */
+.auth-header .brand-wordmark { font-size: 12px; }
 .auth-main {
   display: flex;
   flex: 1;
@@ -40,12 +42,18 @@
 .auth-footer { padding-top: var(--lwc-space-16); }
 .auth-brand-panel {
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
+  gap: var(--lwc-space-32);
   min-width: 0;
   padding: var(--lwc-space-48) var(--lwc-space-32);
   background: var(--lwc-color-action-default);
   color: var(--lwc-color-action-on);
+}
+.auth-brand-tagline {
+  width: 100%;
+  text-align: center;
 }
 .auth-watermark-tree {
   -webkit-mask: url('/brand/legacy-tree.png') center / contain no-repeat;

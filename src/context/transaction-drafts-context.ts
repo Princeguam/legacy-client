@@ -1,11 +1,7 @@
+import type { TransactionDraftsContextValue } from '@/types/transaction'
 import { createContext, useContext } from 'react'
-import type { DraftInput, TransactionDraft } from '@/lib/transaction-drafts'
 
-export const transactionDraftsContext = createContext<{
-  drafts: TransactionDraft[]
-  addDraft: (draft: DraftInput) => boolean
-  removeDraft: (id: string) => void
-} | null>(null)
+export const transactionDraftsContext = createContext<TransactionDraftsContextValue | null>(null)
 
 export function useTransactionDrafts() {
   const context = useContext(transactionDraftsContext)

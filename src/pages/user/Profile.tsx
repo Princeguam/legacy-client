@@ -1,42 +1,122 @@
-import { useRef, useState, type FormEvent } from 'react'
+import { RequestRecovery } from '@/components/shared/product/RequestRecovery'
+import { notify } from '@/lib/notify'
+import { AccountInformation } from '@/components/shared/account-information/AccountInformation'
+import { PersonalFields } from '@/components/shared/account-information/PersonalFields'
+import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { Pencil } from 'lucide-react'
+import { COMMON_LABELS, PROFILE_MESSAGES } from '@/constants/strings'
+import type { AuthContextValue, AuthSession } from '@/types/Auth'
+import type { ApiUser, ProfileFormErrors } from '@/types/user'
+import { useAuth } from '@/context/useAuth'
+import { useProduct } from '@/components/shared/product/product-context'
 import { Button } from '@/components/shared/Button'
 import { Dialog } from '@/components/shared/ui/dialog'
-import { Card } from '@/components/shared/ui/card'
-import { Badge } from '@/components/shared/ui/badge'
-import { Input } from '@/components/shared/ui/input'
-import { Alert } from '@/components/shared/ui/alert'
-import { FormField } from '@/components/shared/form-field/form-field'
 import { PageHeader } from '@/components/shared/product/PageHeader'
-import { Currency } from '@/components/shared/currency/currency'
-import { useProduct } from '@/components/shared/product/product-context'
-import { members, previewMemberId, formatDate, getSummary } from '@/lib/product-data'
+import { PageLoader } from '@/components/shared/page-loader/PageLoader'
+import { profileFormValues, validateProfile } from '@/lib/profile'
+import { toAuthUser } from '@/services/apiUser'
+import { getProfile, updateProfile } from '@/services/userService'
+import { isValidSession } from '@/services/authService'
+import { useFileSelection } from '@/hooks/useFileSelection'
+import { AvatarPicker } from '@/components/shared/account-avatar/AvatarPicker'
 
-type ProfileDraft = { firstName: string; lastName: string; email: string; phone: string }
-export function Profile() {
-  const { role, preview, user } = useProduct()
-  const sample = preview && role === 'user' ? members.find(member => member.id === previewMemberId) : undefined
-  const original: ProfileDraft = { firstName: user?.firstName ?? '', lastName: user?.lastName ?? '', email: user?.email ?? '', phone: sample?.phone ?? '' }
-  const [draft, setDraft] = useState<ProfileDraft>(original)
-  const [saved, setSaved] = useState<ProfileDraft | null>(null)
+
+function ProfileEditor({ session, updateUser }: { session: AuthSession; updateUser: AuthContextValue['updateUser'] }) {
+  const { accessToken } = session
+  const accountId = session.user.id
+  const accountRole = session.user.role
+  const [profile, setProfile] = useState<ApiUser | null>(null)
+  const [loadError, setLoadError] = useState('')
+  const [attempt, setAttempt] = useState(0)
   const [editing, setEditing] = useState(false)
-  const [errors, setErrors] = useState<Partial<Record<keyof ProfileDraft, string>>>({})
+  const [input, setInput] = useState(() => profileFormValues())
+  const [errors, setErrors] = useState<ProfileFormErrors>({})
+  const [isSaving, setIsSaving] = useState(false)
+  const [stage, setStage] = useState('')
+  const avatar = useFileSelection('avatar', session)
+  const submitting = useRef(false)
+  const saveController = useRef<AbortController | null>(null)
   const formRef = useRef<HTMLFormElement>(null)
-  const displayName = [original.firstName, original.lastName].filter(Boolean).join(' ') || 'Your account'
-  function save(event: FormEvent) {
+
+  useEffect(() => {
+    const controller = new AbortController()
+    getProfile(accessToken, { id: accountId, role: accountRole }, controller.signal).then(data => {
+      if (controller.signal.aborted || !updateUser(data, accessToken)) return
+      setProfile(data)
+    }).catch(error => {
+      if (!controller.signal.aborted) { setLoadError('failed'); notify.error(error, 'Unable to load your profile. Please try again.') }
+    })
+    return () => controller.abort()
+  }, [accessToken, accountId, accountRole, attempt, updateUser])
+
+  useEffect(() => () => saveController.current?.abort(), [])
+
+  async function save(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
-    const next: typeof errors = {}
-    if (!draft.firstName.trim()) next.firstName = 'Enter your first name.'
-    if (!draft.lastName.trim()) next.lastName = 'Enter your last name.'
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(draft.email.trim())) next.email = 'Enter a valid email address.'
-    setErrors(next)
-    if (Object.keys(next).length) { requestAnimationFrame(() => formRef.current?.querySelector<HTMLInputElement>('[aria-invalid="true"]')?.focus()); return }
-    setSaved({ ...draft }); setEditing(false)
+    if (submitting.current || !profile || !avatar.ready) return
+    const nextErrors = { ...validateProfile(input), ...(avatar.error ? { passport: avatar.error } : {}) }
+    setErrors(nextErrors)
+
+    if (Object.keys(nextErrors).length) {
+      requestAnimationFrame(() => formRef.current?.querySelector<HTMLElement>('[aria-invalid="true"]:not(input[type="file"])')?.focus())
+      return
+    }
+    submitting.current = true
+    setIsSaving(true)
+    const controller = new AbortController()
+    saveController.current = controller
+    try {
+      const passport = avatar.uploadedUrl
+      if (!isValidSession(session) || controller.signal.aborted) return
+      setStage('Saving profile…')
+      const data = await updateProfile(accessToken, { id: accountId, role: accountRole }, { ...input, ...(passport ? { passport } : {}) }, controller.signal)
+      if (controller.signal.aborted || !updateUser(data, accessToken)) return
+      setProfile(data)
+      setEditing(false)
+      notify.success(PROFILE_MESSAGES.saved)
+    } catch (error) {
+      if (!controller.signal.aborted) {
+        notify.error(error, 'Unable to save your profile. Please try again.')
+      }
+    } finally {
+      submitting.current = false
+      if (!controller.signal.aborted) setIsSaving(false)
+    }
   }
-  return <div className="page-stack"><PageHeader title="Your profile" description="Your account details and cooperative membership." actions={<Button variant="outline" onClick={() => { setDraft(saved ?? original); setErrors({}); setEditing(true) }}><Pencil aria-hidden="true" />Edit profile draft</Button>} />
-    <Card className="product-card"><div className="profile-summary"><span className="avatar" aria-hidden="true">{[original.firstName[0], original.lastName[0]].filter(Boolean).join('') || 'LW'}</span><div><h2 className="type-heading">{displayName}</h2><p>{original.email}</p><div><Badge>{role === 'Admin' ? 'Administrator' : 'Member'}</Badge> <Badge icon={false}>{preview ? 'Sample account' : 'Signed-in account'}</Badge></div></div></div></Card>
-    <div className="dashboard-columns"><Card className="product-card"><h2 className="type-title">Personal information</h2><dl className="profile-fields"><div><dt>First name</dt><dd>{original.firstName || 'Not provided'}</dd></div><div><dt>Last name</dt><dd>{original.lastName || 'Not provided'}</dd></div><div><dt>Email address</dt><dd>{original.email || 'Not provided'}</dd></div><div><dt>Phone number</dt><dd>{original.phone || 'Not provided'}</dd></div><div><dt>Account identifier</dt><dd className="financial">{user?.id ?? 'Not available'}</dd></div><div><dt>Account role</dt><dd>{role === 'Admin' ? 'Administrator' : 'Member'}</dd></div></dl></Card><Card className="product-card"><h2 className="type-title">Membership</h2><dl className="detail-list"><div><dt>Cooperative</dt><dd>Legacy Wealth Cooperatives</dd></div><div><dt>Member since</dt><dd>{sample ? formatDate(sample.joined) : 'Not provided'}</dd></div><div><dt>Status</dt><dd>{sample ? <Badge tone="success">{sample.status}</Badge> : preview ? 'Sample administrator' : 'Not provided'}</dd></div>{role === 'user' && <div><dt>Annual commitment</dt><dd><Currency value={getSummary('user').target} /><span className="type-caption"> · illustrative</span></dd></div>}</dl></Card></div>
-    {saved && <Card className="product-card"><Alert tone="info" title="Profile draft saved for this screen" role="status">Your account has not changed. Leaving this page clears the draft.</Alert><dl className="profile-fields"><div><dt>Draft name</dt><dd>{saved.firstName} {saved.lastName}</dd></div><div><dt>Draft email</dt><dd>{saved.email}</dd></div><div><dt>Draft phone</dt><dd>{saved.phone || 'Not provided'}</dd></div></dl><Button variant="ghost" onClick={() => setSaved(null)}>Discard draft</Button></Card>}
-    <Dialog open={editing} onOpenChange={setEditing} title="Edit profile draft" description="Prepare a profile update. Saving keeps a draft on this screen only; your account stays unchanged." footer={<Button type="submit" form="profile-draft-form">Save draft</Button>}><form ref={formRef} id="profile-draft-form" className="settings-form" onSubmit={save} noValidate><div className="form-grid">{(['firstName', 'lastName'] as const).map(key => <FormField key={key} label={key === 'firstName' ? 'First name' : 'Last name'} error={errors[key]}>{bindings => <Input {...bindings} required autoComplete={key === 'firstName' ? 'given-name' : 'family-name'} value={draft[key]} onChange={event => setDraft({ ...draft, [key]: event.target.value })} />}</FormField>)}</div><FormField label="Email address" error={errors.email}>{bindings => <Input {...bindings} required type="email" autoComplete="email" value={draft.email} onChange={event => setDraft({ ...draft, email: event.target.value })} />}</FormField><FormField label="Phone number" hint="Optional.">{bindings => <Input {...bindings} type="tel" autoComplete="tel" value={draft.phone} onChange={event => setDraft({ ...draft, phone: event.target.value })} />}</FormField></form></Dialog>
+
+  function openEditor() {
+    if (!profile) return
+    setInput(profileFormValues(profile))
+    avatar.remove()
+    setErrors({})
+
+    setEditing(true)
+  }
+
+  return <div className="page-stack">
+    <PageHeader title="Your profile" description="Your account details and cooperative membership." actions={profile && <Button variant="outline" onClick={openEditor}><Pencil aria-hidden="true" />{COMMON_LABELS.editProfile}</Button>} />
+    {loadError ? <RequestRecovery onRetry={() => { setLoadError(''); setAttempt(value => value + 1) }} /> : !profile ? <PageLoader /> : <>
+
+      <AccountInformation user={toAuthUser(profile)} />
+    </>}
+    <Dialog size="wide" open={editing} onOpenChange={setEditing} title={COMMON_LABELS.editProfile} description="Update your personal and contact details." busy={isSaving} footer={<Button type="submit" form="profile-form" loading={isSaving} disabled={!avatar.ready}>Save changes</Button>}>
+      <form ref={formRef} id="profile-form" className="settings-form" onSubmit={save} noValidate aria-busy={isSaving || undefined}>
+        <AvatarPicker selection={avatar} user={profile ? toAuthUser(profile) : null} busy={isSaving} error={errors.passport} />
+        <PersonalFields input={input} errors={errors} readOnly={isSaving} onChange={(field, value) => setInput(current => ({ ...current, [field]: value }))} />
+        {isSaving && <p role="status">{stage}</p>}
+      </form>
+    </Dialog>
   </div>
+}
+
+function ConnectedProfile() {
+  const { session, updateUser } = useAuth()
+  if (!session) return null
+  return <ProfileEditor key={[session.accessToken, session.user.id, session.user.role].join(':')} session={session} updateUser={updateUser} />
+}
+
+export function Profile() {
+  const { preview, user } = useProduct()
+  if (!preview) return <ConnectedProfile />
+  return <div className="page-stack"><PageHeader title="Your profile" description="Profile layout preview. Sign in to view and edit your own profile." /><AccountInformation user={user!} accountLabel="Sample account" /></div>
 }

@@ -1,0 +1,47 @@
+.transaction-details {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--lwc-space-24);
+}
+
+.payment-details-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--lwc-space-24);
+  margin: 0;
+}
+
+.payment-details-grid > div {
+  display: grid;
+  align-content: start;
+  min-width: 0;
+  gap: var(--lwc-space-8);
+}
+
+.payment-details-grid dt {
+  font-size: var(--lwc-type-label-size);
+  font-weight: 500;
+}
+
+.payment-details-grid dd {
+  margin: 0;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.payment-details-wide {
+  grid-column: 1 / -1;
+}
+
+.transaction-review-actions {
+  display: grid;
+  gap: var(--lwc-space-16);
+  padding-bottom: var(--lwc-space-24);
+  border-bottom: 1px solid var(--lwc-color-border-subtle);
+}
+
+@media (max-width: 599px) {
+  .payment-details-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

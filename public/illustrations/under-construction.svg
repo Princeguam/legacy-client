@@ -1,0 +1,131 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="608" height="304" viewBox="0 0 608 304" fill="none">
+  <!-- Clean vector reconstruction of the supplied toolbox illustration.
+       Tool and wood colours follow the source artwork; outlines and brick
+       motifs use approved text/primary and border/subtle colours. -->
+  <defs>
+    <clipPath id="wood-grain">
+      <rect x="182" y="208" width="225" height="84" rx="1"/>
+    </clipPath>
+  </defs>
+
+  <!-- Quiet brick outlines stay transparent against either page theme. -->
+  <g stroke="#C9DEDD" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" opacity=".5">
+    <path d="M312 14h130v20H312zM376 14v20M344 34v20h66V34M445 34h9m6 0h7"/>
+    <path d="M38 164h70v20H38zM5 184h135v20H5zM72 184v20M38 204v20h70v-20M112 164h9"/>
+    <path d="M481 212h73v20h-73zM466 232h128v20H466zM532 232v20M558 212h8M594 252h9"/>
+  </g>
+
+  <g stroke="#001414" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <!-- Back rail and the left timber upright. -->
+    <path d="M194 138h198v8H194z" fill="#868686"/>
+    <path d="M196 140h193" stroke="#B6B6B6"/>
+    <path d="M189 121l12-1 3 83h-20z" fill="#D7A26A"/>
+    <path d="M194 128l-5 68m8-47 2 45" stroke="#AF8354" stroke-width="1"/>
+
+    <!-- Hammer: smooth claw, forged head and blue grip. -->
+    <g id="hammer">
+      <path d="M208 119l11-3 22 75-16 5z" fill="#B6B6B6"/>
+      <path d="M216 125l19 64" stroke="#FBFBFB" stroke-width="2"/>
+      <g transform="rotate(-16 212 111)">
+        <path d="M189 104c-13 1-22 11-24 26 8-9 14-13 24-13z" fill="#B6B6B6"/>
+        <rect x="189" y="96" width="46" height="25" rx="2" fill="#B6B6B6"/>
+        <path d="M192 99h39" stroke="#FBFBFB" stroke-width="1"/>
+        <rect x="235" y="98" width="7" height="21" rx="1" fill="#868686"/>
+        <rect x="242" y="97" width="6" height="23" rx="1" fill="#B6B6B6"/>
+        <path d="M209 104l7 8m-7 0 7-8" stroke="#868686" stroke-width="2"/>
+      </g>
+      <path d="M220 178l20-6 6 23-20 6z" fill="#7A9AF0"/>
+      <path d="M219 176l21-6 2 7-21 6z" fill="#7A9AF0"/>
+      <path d="M225 185l3 10" stroke="#AACBFF" stroke-width="1"/>
+    </g>
+
+    <!-- Spirit level, with its two inset bubble windows. -->
+    <g id="spirit-level" transform="rotate(5 274 143)">
+      <rect x="259" y="87" width="30" height="115" rx="2" fill="#DAD618"/>
+      <path d="M263 92v102m22-103v106" stroke="#F2CD70" stroke-width="2"/>
+      <circle cx="274" cy="108" r="8" fill="#AACBFF"/>
+      <path d="M268 102l12 12" stroke="#001414"/>
+      <path d="M273 103l4 5" stroke="#F3FDFD" stroke-width="2"/>
+      <rect x="270" y="160" width="8" height="28" rx="2" fill="#AACBFF"/>
+      <path d="M274 164v20" stroke="#F3FDFD" stroke-width="2"/>
+      <path d="M264 132v5m5-5v5m-5 51v7m5-7v7" stroke="#956300" stroke-width="1"/>
+    </g>
+
+    <!-- Open-ended wrench: one continuous outline avoids traced fragments. -->
+    <g id="wrench">
+      <path d="M310 114c-7 4-10 12-7 19 2 5 6 8 10 10l7 56c1 5 5 6 10 4 4-1 6-3 5-7l-8-56c7-3 10-9 8-16-1-5-4-8-8-11l2 12c0 4-6 6-10 4-3-1-5-3-6-5z" fill="#B6B6B6"/>
+      <path d="M318 145l7 47" stroke="#FBFBFB" stroke-width="2"/>
+      <circle cx="327" cy="197" r="3" fill="#F3FDFD"/>
+    </g>
+
+    <!-- Axe: rounded cutting edge, wooden haft and red handle collar. -->
+    <g id="axe">
+      <path d="M379 118l12 6-26 63-14-6z" fill="#D7A26A"/>
+      <path d="M382 131l-20 49" stroke="#AF8354" stroke-width="1"/>
+      <path d="M351 177l19 8-8 20-20-8z" fill="#BD595A"/>
+      <path d="M348 181l19 8" stroke="#DD5656" stroke-width="2"/>
+      <path d="M372 86l58 15h15c1 15-4 30-12 47l-15-6-55-14z" fill="#BD595A"/>
+      <path d="M430 101h15c1 15-4 30-12 47l-15-6c7-14 11-27 12-41z" fill="#FBFBFB"/>
+      <path d="M376 91l46 12" stroke="#DD5656" stroke-width="2"/>
+      <path d="M438 108c-1 12-5 22-10 32" stroke="#B6B6B6" stroke-width="1"/>
+      <circle cx="382" cy="103" r="3" fill="#868686"/>
+      <circle cx="377" cy="117" r="3" fill="#868686"/>
+    </g>
+
+    <!-- Front upright covers the lower axe head just as in the reference. -->
+    <path d="M385 121h12l5 82h-18z" fill="#D7A26A"/>
+    <path d="M391 129l4 66m-7-38 1 30" stroke="#AF8354" stroke-width="1"/>
+
+    <!-- Timber crate: straight boards, clear frame and restrained grain. -->
+    <g id="toolbox">
+      <rect x="180" y="204" width="228" height="89" rx="2" fill="#AF8354"/>
+      <rect x="197" y="226" width="194" height="18" rx="1" fill="#D7A26A"/>
+      <rect x="197" y="248" width="194" height="17" rx="1" fill="#D7A26A"/>
+      <rect x="197" y="269" width="194" height="18" rx="1" fill="#D7A26A"/>
+      <path d="M181 211h16v81h-16zM391 211h16v81h-16z" fill="#D7A26A"/>
+      <rect x="182" y="208" width="225" height="18" rx="1" fill="#DAA267"/>
+      <rect x="178" y="285" width="232" height="9" rx="2" fill="#DAA267"/>
+
+      <g clip-path="url(#wood-grain)" stroke="#AF8354" stroke-width="1" opacity=".8">
+        <path d="M188 213c18-5 31 4 52 1s33-2 53 0 49-4 76-1 22 2 32 0"/>
+        <path d="M205 220c21-3 41 1 63 0s48 3 69-1 39 1 61 0"/>
+        <path d="M202 232c19 5 31-4 55 0s38 3 61-1 45 6 68 0"/>
+        <path d="M209 238c18-4 26 3 46 0s36 2 55 0 43-2 71 1"/>
+        <path d="M204 253c26-4 38 3 63 0s48 3 74 1 26-3 43 0"/>
+        <path d="M214 260c15-4 23 3 42 0s39 0 59 0 47 3 65-1"/>
+        <path d="M203 274c18-4 38 3 59 0s47 3 72 0 32 3 49 0"/>
+        <path d="M216 280c16-3 35 1 51 0s38 2 58 0 32-1 47 1"/>
+        <path d="M184 230c7 12-2 22 5 35s-2 12 0 16M402 229c-8 14 0 27-5 39s3 10 2 14"/>
+        <path d="M190 287c18 4 45-2 68 0s33 2 59 0 60 1 83 1"/>
+      </g>
+
+      <rect x="177" y="196" width="236" height="10" rx="2" fill="#D7A26A"/>
+      <path d="M182 199h226" stroke="#E9AA6A" stroke-width="1"/>
+      <g fill="#001414" stroke="none">
+        <circle cx="189" cy="214" r="1.5"/>
+        <circle cx="189" cy="220" r="1.5"/>
+        <circle cx="399" cy="214" r="1.5"/>
+        <circle cx="399" cy="220" r="1.5"/>
+        <circle cx="186" cy="290" r="1.5"/>
+        <circle cx="402" cy="290" r="1.5"/>
+      </g>
+    </g>
+
+    <!-- Loose screwdriver, screw and hex nut along the baseline. -->
+    <g id="screwdriver">
+      <path d="M112 282h53v9h-53z" fill="#B6B6B6"/>
+      <path d="M108 283l8-2 7 2v7l-7 2-8-2z" fill="#868686"/>
+      <path d="M117 284v5" stroke="#B6B6B6"/>
+      <rect x="163" y="275" width="62" height="19" rx="2" fill="#67D0AC"/>
+      <path d="M173 276v17m44-17v17" stroke="#001414"/>
+      <rect x="179" y="279" width="32" height="11" rx="1" fill="#ABE1CF"/>
+      <path d="M183 282h24m-24 4h24" stroke="#648683" stroke-width="1"/>
+      <path d="M159 281h5v11h-5z" fill="#67D0AC"/>
+    </g>
+    <path d="M419 293v-27c0-2 5-2 5 0v27" fill="#B6B6B6"/>
+    <path d="M419 269l5 2m-5 2 5 2m-5 2 5 2m-5 2 5 2m-5 2 5 2" stroke="#648683" stroke-width="1"/>
+    <path d="M437 280h7l4 6-4 6h-7l-4-6z" fill="#B6B6B6"/>
+    <circle cx="440.5" cy="286" r="2.5" fill="#F3FDFD"/>
+    <path d="M126 295h6m8 0h4m84 0h216m7 0h8m7 0h7"/>
+  </g>
+</svg>

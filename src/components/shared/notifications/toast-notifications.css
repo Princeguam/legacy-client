@@ -1,0 +1,78 @@
+.app-toaster[data-sonner-toaster] {
+  width: min(480px, calc(100vw - var(--lwc-space-32)));
+  font-family: inherit;
+}
+
+.ui-dialog .app-toaster[data-sonner-toaster] {
+  width: min(480px, calc(100% - var(--lwc-space-32)));
+}
+
+.app-toaster .app-toast {
+  display: flex;
+  align-items: center;
+  gap: var(--lwc-space-16);
+  width: 100%;
+  padding: var(--lwc-space-16);
+  padding-right: var(--lwc-space-64);
+  border: 1px solid var(--input);
+  border-radius: var(--lwc-radius-8);
+  background: var(--card);
+  color: var(--foreground);
+  overflow-wrap: anywhere;
+  transition-duration: var(--lwc-duration-enter);
+}
+
+.app-toaster .app-toast:focus-visible {
+  box-shadow: none;
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+.app-toast[data-type="success"] {
+  background: var(--lwc-color-status-success-background);
+  color: var(--lwc-color-status-success-text);
+  border-color: var(--lwc-color-status-success-border);
+}
+
+.app-toast[data-type="error"] {
+  background: var(--lwc-color-status-danger-background);
+  color: var(--lwc-color-status-danger-text);
+  border-color: var(--lwc-color-status-danger-border);
+}
+
+.app-toast > [data-icon] {
+  flex-shrink: 0;
+}
+
+.app-toast .toast-close[data-close-button] {
+  display: grid;
+  place-items: center;
+  padding: 0;
+  position: absolute;
+  top: var(--lwc-space-8);
+  right: var(--lwc-space-8);
+  left: auto;
+  width: var(--lwc-dimension-target-min);
+  height: var(--lwc-dimension-target-min);
+  transform: none;
+  border: 1px solid currentColor;
+  border-radius: var(--lwc-radius-4);
+  color: inherit;
+  background: transparent;
+  cursor: pointer;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app-toaster [data-sonner-toast] {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
+@media (forced-colors: active) {
+  .app-toaster .app-toast {
+    background: Canvas;
+    color: CanvasText;
+    border-color: CanvasText;
+  }
+}

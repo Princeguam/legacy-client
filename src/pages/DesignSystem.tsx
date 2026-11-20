@@ -1,3 +1,4 @@
+import { COMMON_LABELS, LEDGER_TIME_ZONE, ROUTES, THEMES } from '@/constants/strings'
 import { useState, type ReactNode } from "react";
 import { ArrowDown, ArrowUpRight, Moon, Plus, Sun } from "lucide-react";
 import { useTheme } from "@/hooks/useTheme";
@@ -118,9 +119,9 @@ export function DesignSystemPage() {
                             <span className="type-caption">/ 1.0</span>
                         </span>
                         <IconButton
-                            label={`Switch to ${theme === "light" ? "dark" : "light"} theme`}
+                            label={`Switch to ${theme === THEMES.light ? THEMES.dark : THEMES.light} theme`}
                             onClick={toggleTheme}>
-                            {theme === "light" ? (
+                            {theme === THEMES.light ? (
                                 <Moon aria-hidden="true" />
                             ) : (
                                 <Sun aria-hidden="true" />
@@ -254,7 +255,7 @@ export function DesignSystemPage() {
                                                             : "Legacy Wealth"}
                                                 </p>
                                                 <span className="financial type-caption">
-                                                    {value.size}/{value.line} ·{" "}
+                                                    {value.size}{ROUTES.root}{value.line} ·{" "}
                                                     {value.weight}
                                                 </span>
                                             </div>
@@ -488,7 +489,7 @@ export function DesignSystemPage() {
                                         )}
                                     </FormField>
                                     <FormField
-                                        label="Email address"
+                                        label={COMMON_LABELS.emailAddress}
                                         error="Enter a complete email address, such as alex@example.com.">
                                         {(bindings) => (
                                             <Input
@@ -681,8 +682,8 @@ export function DesignSystemPage() {
                                         <TableRow>
                                             <TableHead>Reference</TableHead>
                                             <TableHead>Transaction</TableHead>
-                                            <TableHead>Date</TableHead>
-                                            <TableHead>Status</TableHead>
+                                            <TableHead>{COMMON_LABELS.date}</TableHead>
+                                            <TableHead>{COMMON_LABELS.status}</TableHead>
                                             <TableHead className="text-right">
                                                 Amount (GBP)
                                             </TableHead>
@@ -710,7 +711,7 @@ export function DesignSystemPage() {
                                                                 day: "2-digit",
                                                                 month: "short",
                                                                 year: "numeric",
-                                                                timeZone: "UTC",
+                                                                timeZone: LEDGER_TIME_ZONE,
                                                             },
                                                         ).format(
                                                             new Date(
@@ -849,7 +850,7 @@ export function DesignSystemPage() {
                 }>
                 <dl className="review-details">
                     <div>
-                        <dt>Amount</dt>
+                        <dt>{COMMON_LABELS.amount}</dt>
                         <dd>
                             <Currency
                                 value={

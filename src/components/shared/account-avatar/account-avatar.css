@@ -1,0 +1,4 @@
+.account-avatar-photo {
+  display: block;
+  object-fit: cover;
+}

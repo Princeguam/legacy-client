@@ -1,0 +1,5 @@
+.profile-account-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--lwc-space-8);
+}

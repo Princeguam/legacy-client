@@ -1,0 +1,60 @@
+.members-page {
+  grid-template-columns: minmax(0, 1fr);
+  overflow-wrap: anywhere;
+}
+
+.member-directory,
+.member-filters {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.member-filter-fields {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) repeat(2, minmax(0, 1fr));
+  align-items: start;
+  gap: var(--lwc-space-16);
+}
+
+.member-filter-fields > .field,
+.member-identity > * {
+  min-width: 0;
+}
+
+.member-identity {
+  display: flex;
+  align-items: center;
+  gap: var(--lwc-space-16);
+  flex-wrap: nowrap;
+  width: max-content;
+}
+
+.member-identity .cell-stack {
+  grid-template-columns: max-content;
+  white-space: nowrap;
+  overflow-wrap: normal;
+}
+
+.member-identity .avatar {
+  flex-shrink: 0;
+}
+
+.member-view {
+  min-height: 44px;
+  padding: var(--lwc-space-8) var(--lwc-space-16);
+}
+
+
+@media (max-width: 959px) {
+  .member-filter-fields {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .member-filter-fields > .field:first-child {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 599px) {
+  .member-filter-fields {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

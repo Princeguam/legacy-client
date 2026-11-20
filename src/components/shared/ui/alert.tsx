@@ -1,7 +1,7 @@
+import type { StatusTone } from '@/types/ui'
 import type { ComponentProps } from 'react'
 import { Check, Info, TriangleAlert, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import type { StatusTone } from './badge'
 
 const icons = { success: Check, warning: TriangleAlert, danger: X, info: Info }
 export function Alert({ tone = 'info', title, children, className, role, ...props }: Omit<ComponentProps<'div'>, 'title'> & { tone?: Exclude<StatusTone, 'neutral'>; title: string }) {

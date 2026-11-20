@@ -1,11 +1,10 @@
-import type { LoginCredentials } from '@/services/authService'
-
-export type LoginErrors = { email?: string; password?: string }
-
+import { EMAIL_PATTERN } from '@/constants/values'
+import type { LoginCredentials, LoginErrors } from '@/types/Auth'
+import { AUTH_MESSAGES } from '@/constants/strings'
 export function validateLogin({ email, password }: LoginCredentials): LoginErrors {
   const errors: LoginErrors = {}
-  if (!email.trim()) errors.email = 'Enter your email address.'
-  else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) errors.email = 'Enter a valid email address, such as name@example.com.'
-  if (!password) errors.password = 'Enter your password.'
+  if (!email.trim()) errors.email = AUTH_MESSAGES.emailRequired
+  else if (!EMAIL_PATTERN.test(email.trim())) errors.email = AUTH_MESSAGES.emailInvalid
+  if (!password) errors.password = AUTH_MESSAGES.passwordRequired
   return errors
 }

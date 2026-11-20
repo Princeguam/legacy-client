@@ -1,364 +1,100 @@
-import { useRef, useState, type FormEvent } from "react";
-import { Link, Navigate, useNavigate } from "react-router-dom";
-import { ArrowLeft, Paperclip } from "lucide-react";
-import { Button } from "@/components/shared/Button";
-import { Modal as Dialog } from "@/components/shared/Modal";
-import { Card } from "@/components/shared/ui/card";
-import { Alert } from "@/components/shared/ui/alert";
-import { Input } from "@/components/shared/ui/input";
-import { NativeSelect } from "@/components/shared/ui/native-select";
-import { Textarea } from "@/components/shared/ui/textarea";
-import { FormField } from "@/components/shared/form-field/form-field";
-import { Currency } from "@/components/shared/currency/currency";
-import { Receipt } from "@/components/shared/receipt/Receipt";
-import { PageHeader } from "@/components/shared/product/PageHeader";
-import { useProduct } from "@/components/shared/product/product-context";
-import { useTransactionDrafts } from "@/context/transaction-drafts-context";
-import {
-    localToday,
-    parseAmountMinor,
-    receiptError,
-    transactionTypes,
-    validateTransaction,
-    type TransactionForm,
-    type TransactionErrors,
-    type TransactionType,
-} from "@/lib/transaction-drafts";
+import { notify } from '@/lib/notify'
+import { useEffect, useRef, useState } from 'react'
+import type { FormEvent } from 'react'
+import { Link, Navigate, useNavigate } from 'react-router-dom'
+import { ArrowLeft } from 'lucide-react'
+import { COMMON_LABELS, MIN_TRANSACTION_DATE, PAGE_LABELS, PAGE_PATHS, PAYMENT_MESSAGES, USER_ROLES } from '@/constants/strings'
+import { TRANSACTION_LIMITS } from '@/constants/values'
+import type { AuthSession } from '@/types/Auth'
+import type { TransactionErrors, TransactionForm } from '@/types/transaction'
+import { Button } from '@/components/shared/Button'
+import { Modal as Dialog } from '@/components/shared/Modal'
+import { Card } from '@/components/shared/ui/card'
+import { Alert } from '@/components/shared/ui/alert'
+import { Input } from '@/components/shared/ui/input'
+import { Textarea } from '@/components/shared/ui/textarea'
+import { FormField } from '@/components/shared/form-field/form-field'
+import { MinorCurrency } from '@/components/shared/currency/minor-currency'
+import { FilePicker } from '@/components/shared/receipt/FilePicker'
+import { PageHeader } from '@/components/shared/product/PageHeader'
+import { useProduct } from '@/components/shared/product/product-context'
+import { useAuth } from '@/context/useAuth'
+import { useFileSelection } from '@/hooks/useFileSelection'
+import { useTransactionDrafts } from '@/context/transaction-drafts-context'
+import { localToday, parseAmountMinor, validateTransaction } from '@/lib/transaction-drafts'
+import { formatPaymentDate } from '@/lib/transactions'
+import { createTransaction } from '@/services/userService'
+import { isValidSession } from '@/services/authService'
+import { BankAccountSelect } from '@/components/shared/transactions/BankAccountSelect'
+import { useBankAccountOptions } from '@/hooks/useBankAccountOptions'
+import { BANK_ACCOUNT_MESSAGES } from '@/constants/strings'
+import { bankAccountLabel } from '@/lib/bank-accounts'
 
 export function AddTransaction() {
-    const { basePath, role } = useProduct();
-    const { addDraft } = useTransactionDrafts();
-    const navigate = useNavigate();
-    const [form, setForm] = useState<TransactionForm>({
-        description: "",
-        type: "Contribution",
-        date: localToday(),
-        amount: "",
-        reference: "",
-        notes: "",
-    });
-    const [receipt, setReceipt] = useState<File | null>(null);
-    const [errors, setErrors] = useState<TransactionErrors>({});
-    const [review, setReview] = useState(false);
-    const [duplicate, setDuplicate] = useState(false);
-    const fileRef = useRef<HTMLInputElement>(null);
-    const formRef = useRef<HTMLFormElement>(null);
-    const saved = useRef(false);
-    if (role !== "user")
-        return <Navigate to={`${basePath}/transactions`} replace />;
-    function update(key: keyof TransactionForm, value: string) {
-        setForm((previous) => ({ ...previous, [key]: value }));
-        setErrors((previous) => ({ ...previous, [key]: undefined }));
-        setDuplicate(false);
+  const { basePath, role, preview } = useProduct()
+  const { session } = useAuth()
+  if (role !== USER_ROLES.user) return <Navigate to={`${basePath}/${PAGE_PATHS.transactions}`} replace />
+  return <PaymentEntry key={`${basePath}:${preview ? 'preview' : session?.accessToken}:${session?.user.id}`} session={preview ? null : session} preview={preview} basePath={basePath} />
+}
+
+function PaymentEntry({ session, preview, basePath }: { session: AuthSession | null; preview: boolean; basePath: string }) {
+  const { addDraft } = useTransactionDrafts()
+  const navigate = useNavigate()
+  const [form, setForm] = useState<TransactionForm>({ bankAccountId: '', period: localToday().slice(0, 7), date: localToday(), amount: '', notes: '' })
+  const receipt = useFileSelection('receipt', session, preview)
+  const banks = useBankAccountOptions(session, preview)
+  const selectedBank = banks.accounts.find(bank => String(bank.id) === form.bankAccountId && bank.isActive)
+  const [errors, setErrors] = useState<TransactionErrors>({})
+  const [review, setReview] = useState(false)
+  const [duplicate, setDuplicate] = useState(false)
+  const [saving, setSaving] = useState(false)
+  const [stage, setStage] = useState('')
+  const formRef = useRef<HTMLFormElement>(null)
+  const submittingRef = useRef(false)
+  const controllerRef = useRef<AbortController | null>(null)
+  useEffect(() => () => controllerRef.current?.abort(), [])
+  function update(key: keyof TransactionForm, value: string) { setForm(current => ({ ...current, [key]: value })); setErrors(current => ({ ...current, [key]: undefined })); setDuplicate(false) }
+  function prepare(event: FormEvent) {
+    event.preventDefault()
+    if (!receipt.ready) return
+    const next = { ...validateTransaction(form, receipt.file), ...(!selectedBank ? { bankAccountId: BANK_ACCOUNT_MESSAGES.required } : {}), ...(receipt.error ? { receipt: receipt.error } : !preview && !receipt.file ? { receipt: 'Attach a receipt before submitting this payment.' } : {}) }
+    setErrors(next);
+    if (Object.values(next).some(Boolean)) { formRef.current?.querySelector<HTMLElement>(`[name="${Object.keys(next)[0]}"]`)?.focus(); return }
+    setReview(true)
+  }
+  async function save() {
+    if (submittingRef.current || !selectedBank || banks.loading || banks.failed || !receipt.ready) return
+    if (preview) {
+      if (!addDraft({ bankAccountId: Number(form.bankAccountId), period: form.period, date: form.date, notes: form.notes.trim(), amountMinor: parseAmountMinor(form.amount)!, receipt: receipt.file })) { setDuplicate(true); return }
+      submittingRef.current = true
+      navigate(`${basePath}/${PAGE_PATHS.transactions}`, { state: { draftSaved: true } }); return
     }
-    function reviewTransaction(event: FormEvent) {
-        event.preventDefault();
-        const next = {
-            ...validateTransaction(form, receipt),
-            ...(errors.receipt ? { receipt: errors.receipt } : {}),
-        };
-        setErrors(next);
-        if (Object.values(next).some(Boolean)) {
-            const order: (keyof TransactionErrors)[] = ["type", "date", "amount", "reference", "description", "notes", "receipt"];
-            const first = order.find(key => next[key]);
-            formRef.current
-                ?.querySelector<HTMLElement>(`[name="${first}"]`)
-                ?.focus();
-            return;
-        }
-        setReview(true);
-    }
-    function save() {
-        if (saved.current) return;
-        const next = validateTransaction(form, receipt);
-        if (Object.values(next).some(Boolean)) {
-            setErrors(next);
-            setReview(false);
-            return;
-        }
-        const added = addDraft({
-            ...form,
-            description: form.description.trim(),
-            type: form.type as TransactionType,
-            reference: form.reference.trim(),
-            notes: form.notes.trim(),
-            amountMinor: parseAmountMinor(form.amount)!,
-            receipt,
-        });
-        if (!added) {
-            setDuplicate(true);
-            return;
-        }
-        saved.current = true;
-        navigate(`${basePath}/transactions`, { state: { draftSaved: true } });
-    }
-    return (
-        <div className="page-stack">
-            <PageHeader
-                title="Add transaction"
-                description="Record a transaction that has already happened and keep its receipt together."
-                actions={
-                    <Link
-                        to={`${basePath}/transactions`}
-                        className="standalone-link type-label">
-                        <ArrowLeft aria-hidden="true" />
-                        Back to transactions
-                    </Link>
-                }
-            />
-            <Alert title="Local draft">
-                <p>
-                    Entries and receipts stay in this workspace’s memory. They
-                    are not submitted and do not change balances. Reloading,
-                    signing out, or switching workspace clears them.
-                </p>
-            </Alert>
-            <form
-                ref={formRef}
-                onSubmit={reviewTransaction}
-                noValidate
-                className="page-stack">
-                <Card className="product-card">
-                    <h2 className="type-title">Transaction details</h2>
-                    <div className="form-grid">
-                        <FormField label="Transaction type" error={errors.type}>
-                            {(bindings) => (
-                                <NativeSelect
-                                    {...bindings}
-                                    name="type"
-                                    value={form.type}
-                                    onChange={(event) =>
-                                        update("type", event.target.value)
-                                    }>
-                                    {transactionTypes.map((type) => (
-                                        <option key={type}>{type}</option>
-                                    ))}
-                                </NativeSelect>
-                            )}
-                        </FormField>
-                        <FormField
-                            label="Transaction date"
-                            hint="The date it happened, today or earlier."
-                            error={errors.date}>
-                            {(bindings) => (
-                                <Input
-                                    {...bindings}
-                                    name="date"
-                                    type="date"
-                                    required
-                                    min="1000-01-01"
-                                    max={localToday()}
-                                    value={form.date}
-                                    onChange={(event) =>
-                                        update("date", event.target.value)
-                                    }
-                                />
-                            )}
-                        </FormField>
-                        <FormField
-                            label="Amount (NGN)"
-                            hint="Nigerian naira. Use a decimal point, for example 80000.00."
-                            error={errors.amount}>
-                            {(bindings) => (
-                                <Input
-                                    {...bindings}
-                                    name="amount"
-                                    inputMode="decimal"
-                                    required
-                                    value={form.amount}
-                                    onChange={(event) =>
-                                        update("amount", event.target.value)
-                                    }
-                                />
-                            )}
-                        </FormField>
-                        <FormField
-                            label="Payment reference (optional)"
-                            hint="The reference on your bank confirmation or receipt."
-                            error={errors.reference}>
-                            {(bindings) => (
-                                <Input
-                                    {...bindings}
-                                    name="reference"
-                                    className="financial"
-                                    maxLength={100}
-                                    value={form.reference}
-                                    onChange={(event) =>
-                                        update("reference", event.target.value)
-                                    }
-                                />
-                            )}
-                        </FormField>
-                    </div>
-                    <FormField label="Description" error={errors.description}>
-                        {(bindings) => (
-                            <Input
-                                {...bindings}
-                                name="description"
-                                required
-                                maxLength={160}
-                                value={form.description}
-                                onChange={(event) =>
-                                    update("description", event.target.value)
-                                }
-                                placeholder="For example, November cooperative contribution"
-                            />
-                        )}
-                    </FormField>
-                    <FormField label="Notes (optional)" error={errors.notes}>
-                        {(bindings) => (
-                            <Textarea
-                                {...bindings}
-                                name="notes"
-                                rows={4}
-                                maxLength={1000}
-                                value={form.notes}
-                                onChange={(event) =>
-                                    update("notes", event.target.value)
-                                }
-                            />
-                        )}
-                    </FormField>
-                </Card>
-                <Card className="product-card">
-                    <h2 className="type-title">Receipt</h2>
-                    <FormField
-                        label="Attach receipt (optional)"
-                        hint="One PDF, JPEG, or PNG, up to 10 MB. Kept locally with this draft."
-                        error={errors.receipt}>
-                        {(bindings) => (
-                            <div className="receipt-picker">
-                                <Paperclip aria-hidden="true" />
-                                <Input
-                                    {...bindings}
-                                    ref={fileRef}
-                                    name="receipt"
-                                    type="file"
-                                    accept="application/pdf,image/jpeg,image/png,.pdf,.jpg,.jpeg,.png"
-                                    onChange={(event) => {
-                                        const file = event.target.files?.[0];
-                                        if (!file) return;
-                                        const error = receiptError(file);
-                                        setErrors((previous) => ({
-                                            ...previous,
-                                            receipt: error,
-                                        }));
-                                        if (!error) {
-                                            setReceipt(file);
-                                            setDuplicate(false);
-                                        }
-                                        event.target.value = "";
-                                    }}
-                                />
-                            </div>
-                        )}
-                    </FormField>
-                    {errors.receipt && (
-                        <Button
-                            variant="ghost"
-                            onClick={() => {
-                                setErrors((previous) => ({
-                                    ...previous,
-                                    receipt: undefined,
-                                }));
-                                fileRef.current?.focus();
-                            }}>
-                            Dismiss file error
-                            {receipt ? " and keep current receipt" : ""}
-                        </Button>
-                    )}
-                    {receipt && (
-                        <Receipt
-                            file={receipt}
-                            onRemove={() => {
-                                setReceipt(null);
-                                setErrors((previous) => ({
-                                    ...previous,
-                                    receipt: undefined,
-                                }));
-                                if (fileRef.current) fileRef.current.value = "";
-                                fileRef.current?.focus();
-                            }}
-                        />
-                    )}
-                </Card>
-                {Object.values(errors).some(Boolean) && (
-                    <p role="alert" className="field-error">
-                        Check the highlighted fields. Your entries and accepted
-                        receipt are preserved.
-                    </p>
-                )}
-                <div className="inline-actions">
-                    <Link
-                        to={`${basePath}/transactions`}
-                        className="standalone-link">
-                        Cancel
-                    </Link>
-                    <Button type="submit" primaryAction>
-                        Review transaction
-                    </Button>
-                </div>
-            </form>
-            <Dialog
-                open={review}
-                onOpenChange={setReview}
-                title="Review transaction"
-                description="Check the details before saving this local draft. This does not submit a payment or transaction."
-                footer={<Button onClick={save}>Save transaction draft</Button>}>
-                <dl className="detail-list">
-                    <div>
-                        <dt>Type</dt>
-                        <dd>{form.type}</dd>
-                    </div>
-                    <div>
-                        <dt>Date</dt>
-                        <dd>{form.date}</dd>
-                    </div>
-                    <div>
-                        <dt>Amount</dt>
-                        <dd>
-                            <Currency
-                                value={
-                                    (parseAmountMinor(form.amount) ?? 0) / 100
-                                }
-                            />
-                        </dd>
-                    </div>
-                    <div>
-                        <dt>Description</dt>
-                        <dd>{form.description}</dd>
-                    </div>
-                    <div>
-                        <dt>Payment reference</dt>
-                        <dd className="financial">
-                            {form.reference || "Not provided"}
-                        </dd>
-                    </div>
-                    <div>
-                        <dt>Receipt</dt>
-                        <dd>{receipt?.name || "None attached"}</dd>
-                    </div>
-                    <div>
-                        <dt>Fees</dt>
-                        <dd>No fee for saving a local draft.</dd>
-                    </div>
-                </dl>
-                {form.notes && (
-                    <p className="transaction-notes">{form.notes}</p>
-                )}
-                {duplicate && (
-                    <Alert
-                        tone="warning"
-                        title="Draft already exists"
-                        role="alert">
-                        <p>
-                            A draft with the same type, date, amount, and
-                            reference or description is already saved. Cancel to
-                            edit your entry or return to transactions.
-                        </p>
-                    </Alert>
-                )}
-            </Dialog>
-        </div>
-    );
+    if (!session || !receipt.file) return
+    submittingRef.current = true; setSaving(true);
+    const controller = new AbortController(); controllerRef.current = controller
+    try {
+      const attachmentUrl = receipt.uploadedUrl
+      if (!attachmentUrl || controller.signal.aborted || !isValidSession(session)) return
+      setStage('Submitting payment…')
+      await createTransaction(session.accessToken, session.user, { bankAccountId: Number(form.bankAccountId), amount: parseAmountMinor(form.amount)!, period: `${form.period}-01`, depositedAt: `${form.date}T00:00:00Z`, note: form.notes.trim(), attachmentUrl }, controller.signal)
+      if (!controller.signal.aborted && isValidSession(session)) { notify.success('Your payment has been submitted for review.'); navigate(`${basePath}/${PAGE_PATHS.transactions}`, { replace: true, state: { transactionCreated: true } }) }
+    } catch (error) { if (!controller.signal.aborted) notify.error(error, PAYMENT_MESSAGES.saveFailed) }
+    finally { submittingRef.current = false; if (!controller.signal.aborted) setSaving(false) }
+  }
+  return <div className="page-stack"><PageHeader title={preview ? 'Add transaction draft' : PAGE_LABELS.addTransaction} description="Record a member payment and attach its receipt for review." actions={<Link className="standalone-link" to={`${basePath}/${PAGE_PATHS.transactions}`}><ArrowLeft aria-hidden="true" />Back to transactions</Link>} />
+    {preview ? <Alert title="Local draft">Preview entries and files stay in memory and are not submitted. Reloading or switching workspace clears them.</Alert> : <Alert title="Payment review">Your receipt uploads as soon as you select it. The payment is submitted after review and remains pending until an administrator reviews it.</Alert>}
+    <form ref={formRef} onSubmit={prepare} noValidate className="page-stack"><Card className="product-card"><h2 className="type-title">Payment details</h2><div className="form-grid">
+      <BankAccountSelect accounts={banks.accounts} value={form.bankAccountId} onChange={value => update('bankAccountId', value)} loading={banks.loading} failed={banks.failed} onRetry={banks.retry} busy={saving} error={errors.bankAccountId} />
+      <FormField label="Amount (NGN)" hint="Use a decimal point, for example 80000.01." error={errors.amount}>{bindings => <Input {...bindings} name="amount" inputMode="decimal" required value={form.amount} onChange={event => update('amount', event.target.value)} />}</FormField>
+      <FormField label="Payment period" error={errors.period}>{bindings => <Input {...bindings} name="period" type="month" required value={form.period} onChange={event => update('period', event.target.value)} />}</FormField>
+      <FormField label="Payment date" hint="Today or earlier." error={errors.date}>{bindings => <Input {...bindings} name="date" type="date" required min={MIN_TRANSACTION_DATE} max={localToday()} value={form.date} onChange={event => update('date', event.target.value)} />}</FormField>
+    </div><FormField label="Note" error={errors.notes}>{bindings => <Textarea {...bindings} name="notes" rows={4} maxLength={TRANSACTION_LIMITS.notes} value={form.notes} onChange={event => update('notes', event.target.value)} />}</FormField></Card>
+    <Card className="product-card"><h2 className="type-title">Receipt</h2><FilePicker selection={receipt} kind="receipt" preview={preview} busy={saving} required={!preview} error={receipt.file ? undefined : errors.receipt} /></Card>
+    <div className="inline-actions"><Link className="standalone-link" to={`${basePath}/${PAGE_PATHS.transactions}`}>{COMMON_LABELS.cancel}</Link><Button type="submit" primaryAction disabled={banks.loading || banks.failed || !banks.accounts.length || !receipt.ready}>Review transaction</Button></div></form>
+    <Dialog open={review} onOpenChange={setReview} title="Review transaction" description={preview ? 'Check this local draft. Saving does not submit a payment.' : 'Check the bank account, amount, payment period and receipt before submitting.'} busy={saving} footer={<Button loading={saving} onClick={save} disabled={!receipt.ready || !preview && !session}>{preview ? 'Save transaction draft' : 'Submit transaction'}</Button>}>
+      {saving && <p role="status">{stage}</p>}
+      <dl className="detail-list"><div><dt>{BANK_ACCOUNT_MESSAGES.label}</dt><dd>{selectedBank ? bankAccountLabel(selectedBank) : COMMON_LABELS.notAvailable}</dd></div><div><dt>Payment period</dt><dd>{formatPaymentDate(`${form.period}-01`, true)}</dd></div><div><dt>Payment date</dt><dd>{form.date}</dd></div><div><dt>Amount</dt><dd><MinorCurrency value={parseAmountMinor(form.amount) ?? '0'} /></dd></div><div><dt>Note</dt><dd>{form.notes || COMMON_LABELS.notProvided}</dd></div><div><dt>Receipt</dt><dd>{receipt.file?.name || 'None attached'}</dd></div></dl>
+      {duplicate && <Alert tone="warning" title="Draft already exists" role="alert">A draft with the same details is already saved. Cancel to edit your entry.</Alert>}
+    </Dialog>
+  </div>
 }

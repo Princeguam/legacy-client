@@ -2,6 +2,12 @@
 .receipt-picker input[type='file'] { width: 100%; min-width: 0; height: auto; min-height: var(--lwc-dimension-target-min); padding: var(--lwc-space-8); }
 .receipt-picker input::file-selector-button { min-height: var(--lwc-dimension-target-min); margin-right: var(--lwc-space-8); padding: var(--lwc-space-8) var(--lwc-space-16); border: 1px solid var(--lwc-color-border-control); border-radius: var(--lwc-radius-8); background: var(--lwc-color-secondary-default); color: var(--lwc-color-secondary-on); font: inherit; cursor: pointer; }
 .receipt-preview { display: grid; gap: var(--lwc-space-16); min-width: 0; padding: var(--lwc-space-16); border: 1px solid var(--lwc-color-border-subtle); border-radius: var(--lwc-radius-8); }
+.receipt-attachment { display: inline-flex; align-items: center; gap: var(--lwc-space-16); color: var(--lwc-color-text-primary); text-decoration: none; max-width: 100%; }
+.receipt-attachment-preview { display: grid; place-items: center; flex-shrink: 0; width: var(--lwc-space-80); height: var(--lwc-space-80); border: 1px solid var(--lwc-color-border-control); border-radius: var(--lwc-radius-8); background: var(--lwc-color-surface-raised); overflow: hidden; }
+.receipt-attachment-preview img { display: block; width: 100%; height: 100%; object-fit: contain; }
+.receipt-attachment-preview > svg { width: var(--lwc-space-32); height: var(--lwc-space-32); }
+.receipt-attachment > span:last-child { display: inline-flex; align-items: center; flex-wrap: wrap; gap: var(--lwc-space-8); }
+.receipt-attachment > span:last-child svg { width: var(--lwc-space-16); height: var(--lwc-space-16); }
 .receipt-thumbnail { display: block; width: 100%; max-height: calc(var(--lwc-space-128) * 2); object-fit: contain; border-radius: var(--lwc-radius-4); }
 .receipt-file { display: flex; align-items: flex-start; gap: var(--lwc-space-16); min-height: var(--lwc-space-64); }
 .receipt-file > svg { flex-shrink: 0; }

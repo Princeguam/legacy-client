@@ -1,3 +1,4 @@
+import { APP_CURRENCY, APP_LOCALE } from '@/constants/strings'
 import { Card } from "../ui/card";
 import { Currency } from "../currency/currency";
 import { Skeleton } from "../ui/skeleton";
@@ -6,8 +7,8 @@ import { Button } from "../ui/button";
 export function MetricCard({
     label,
     value,
-    currency = "NGN",
-    locale = "en-NG",
+    currency = APP_CURRENCY,
+    locale = APP_LOCALE,
     period,
     note,
     loading = false,

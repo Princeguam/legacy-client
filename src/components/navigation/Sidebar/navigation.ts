@@ -1,38 +1,33 @@
+import type { NavigationItem } from '@/types/navigation'
+import { PAGE_LABELS, PAGE_PATHS } from '@/constants/strings'
 import {
     ArrowLeftRight,
     BriefcaseBusiness,
     CircleUserRound,
     House,
+    Landmark,
     MessageSquare,
     Settings,
     Users,
-    Wallet,
-    type LucideIcon,
 } from "lucide-react";
 
-export type NavigationItem = {
-    path: string;
-    label: string;
-    icon: LucideIcon;
-    section?: "utility";
-};
 export function getNavigation(admin: boolean): NavigationItem[] {
     return [
-        { path: "home", label: "Home", icon: House },
-        { path: "transactions", label: "Transactions", icon: ArrowLeftRight },
-        { path: "contributions", label: "Contributions", icon: Wallet },
-        { path: "portfolio", label: "Portfolio", icon: BriefcaseBusiness },
-        ...(admin ? [{ path: "members", label: "Members", icon: Users }] : []),
-        { path: "profile", label: "Profile", icon: CircleUserRound },
+        { path: PAGE_PATHS.home, label: PAGE_LABELS.home, icon: House },
+        { path: PAGE_PATHS.transactions, label: PAGE_LABELS.transactions, icon: ArrowLeftRight },
+        { path: PAGE_PATHS.portfolio, label: PAGE_LABELS.portfolio, icon: BriefcaseBusiness },
+        ...(admin ? [{ path: PAGE_PATHS.members, label: PAGE_LABELS.members, icon: Users }] : []),
+        ...(admin ? [{ path: PAGE_PATHS.bankAccounts, label: PAGE_LABELS.bankAccounts, icon: Landmark }] : []),
+        { path: PAGE_PATHS.profile, label: PAGE_LABELS.profile, icon: CircleUserRound },
         {
-            path: "settings",
-            label: "Settings",
+            path: PAGE_PATHS.settings,
+            label: PAGE_LABELS.settings,
             icon: Settings,
             section: "utility",
         },
         {
-            path: "feedback",
-            label: "Feedback",
+            path: PAGE_PATHS.feedback,
+            label: PAGE_LABELS.feedback,
             icon: MessageSquare,
             section: "utility",
         },

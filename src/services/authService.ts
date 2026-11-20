@@ -1,83 +1,72 @@
-export type UserRole = 'user' | 'Admin'
+import { API_PATHS, AUTH_MESSAGES, USER_ROLES } from '@/constants/strings'
+import type { AuthSession, AuthUser, LoginCredentials, LoginResponseData } from '@/types/Auth'
+import { isRecord } from '@/lib/is-record'
+import { isApiResponse } from './apiResponse'
+import { ApiError, requestApi } from './apiClient'
+import { isApiUser, nullableProfileFields, profileFields, toAuthUser } from './apiUser'
 
-export type AuthUser = {
-  id: string | number
-  email: string
-  firstName?: string
-  lastName?: string
-  role: UserRole
-}
-
-export type AuthSession = {
-  user: AuthUser
-  accessToken: string
-  expiresAt: number
-}
-
-export type LoginCredentials = { email: string; password: string }
-
-export class AuthError extends Error {
-  constructor(message: string) {
-    super(message)
+export class AuthError extends ApiError {
+  constructor(message: string, errorCode?: number, status?: number) {
+    super(message, errorCode, status)
     this.name = 'AuthError'
   }
 }
 
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null && !Array.isArray(value)
-}
-
 function validUser(value: unknown): value is AuthUser {
-  return isRecord(value) && ((typeof value.id === 'string' && value.id.length > 0) || (typeof value.id === 'number' && Number.isFinite(value.id))) && typeof value.email === 'string' && value.email.length > 0 && (value.role === 'user' || value.role === 'Admin') && (value.firstName === undefined || typeof value.firstName === 'string') && (value.lastName === undefined || typeof value.lastName === 'string')
+  return isRecord(value) &&
+    ((typeof value.id === 'string' && value.id.trim().length > 0) ||
+      (typeof value.id === 'number' && Number.isSafeInteger(value.id) && value.id > 0)) &&
+    typeof value.email === 'string' && value.email.trim().length > 0 &&
+    (value.role === USER_ROLES.user || value.role === USER_ROLES.admin) &&
+    profileFields.every(key => value[key] === undefined || typeof value[key] === 'string') &&
+    nullableProfileFields.every(key => value[key] === undefined || value[key] === null || typeof value[key] === 'string') &&
+    (value.isAdmin === undefined || typeof value.isAdmin === 'boolean') &&
+    (value.isDeleted === undefined || value.isDeleted === false)
 }
 
 export function isValidSession(value: unknown): value is AuthSession {
-  return isRecord(value) && validUser(value.user) && typeof value.accessToken === 'string' && value.accessToken.length > 0 && typeof value.expiresAt === 'number' && Number.isFinite(value.expiresAt) && value.expiresAt > Date.now()
+  return isRecord(value) && validUser(value.user) &&
+    typeof value.accessToken === 'string' && value.accessToken.trim().length > 0 &&
+    (value.refreshToken === undefined || (typeof value.refreshToken === 'string' && value.refreshToken.trim().length > 0)) &&
+    typeof value.expiresAt === 'number' && Number.isFinite(value.expiresAt) && value.expiresAt > Date.now()
 }
 
-// Match the existing server's sendResponse envelope and Prisma User/Admin roles.
-// Only the server role determines access; isAdmin flags are not consulted.
+function isLoginResponseData(value: unknown): value is LoginResponseData {
+  if (!isRecord(value)) return false
+  const { accessToken, refreshToken, expiresAt } = value
+  return isApiUser(value) && value.isDeleted === false &&
+    typeof accessToken === 'string' && accessToken.trim().length > 0 &&
+    typeof refreshToken === 'string' && refreshToken.trim().length > 0 &&
+    typeof expiresAt === 'number' && Number.isFinite(expiresAt) && expiresAt > Date.now()
+}
+
+/** Match the backend login serializer; only the returned role grants navigation access. */
 export function parseLoginResponse(value: unknown): AuthSession {
-  if (!isRecord(value) || value.success !== true || !isRecord(value.data)) {
-    throw new AuthError('Unable to sign in. Please try again.')
-  }
-  const data = value.data
-  const role = data.role === 'User' || data.role === 'user' ? 'user' : data.role === 'Admin' ? 'Admin' : null
-  const session = {
-    user: { id: data.id, email: data.email, ...(typeof data.firstName === 'string' ? { firstName: data.firstName } : {}), ...(typeof data.lastName === 'string' ? { lastName: data.lastName } : {}), role },
+  if (!isApiResponse(value)) throw new AuthError(AUTH_MESSAGES.unavailable)
+  if (!value.success) throw new AuthError(value.message, value.errorCode)
+  return parseLoginData(value.data)
+}
+
+function parseLoginData(data: unknown): AuthSession {
+  if (!isLoginResponseData(data)) throw new AuthError(AUTH_MESSAGES.unverified)
+  return {
+    user: toAuthUser(data),
     accessToken: data.accessToken,
+    refreshToken: data.refreshToken,
     expiresAt: data.expiresAt,
   }
-  if (data.isDeleted === true || !isValidSession(session)) {
-    throw new AuthError('Your account could not be verified. Please contact your cooperative administrator.')
-  }
-  return session
 }
 
 export async function login(credentials: LoginCredentials): Promise<AuthSession> {
-  const controller = new AbortController()
-  const timeout = setTimeout(() => controller.abort(), 20000)
-  const baseUrl = (import.meta.env.VITE_API_BASE_URL || '/api').replace(/\/$/, '')
   try {
-    const response = await fetch(`${baseUrl}/auth/login`, {
+    return await requestApi(API_PATHS.login, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-      body: JSON.stringify({ email: credentials.email.trim(), password: credentials.password }),
-      signal: controller.signal,
-    })
-    let payload: unknown
-    try { payload = await response.json() } catch {
-      throw new AuthError('The sign-in service is unavailable. Please try again shortly.')
-    }
-    if (!response.ok || !isRecord(payload) || payload.success !== true) {
-      if (response.status >= 500) throw new AuthError('The sign-in service is unavailable. Please try again shortly.')
-      if (response.status === 429) throw new AuthError('Too many sign-in attempts. Please wait a moment and try again.')
-      throw new AuthError(isRecord(payload) && typeof payload.message === 'string' ? payload.message : 'Unable to sign in. Check your email and password, then try again.')
-    }
-    return parseLoginResponse(payload)
+      body: { email: credentials.email.trim(), password: credentials.password },
+      messages: AUTH_MESSAGES,
+    }, parseLoginData)
   } catch (error) {
     if (error instanceof AuthError) throw error
-    if (controller.signal.aborted) throw new AuthError('The sign-in request timed out. Please try again.')
-    throw new AuthError('Unable to connect to the sign-in service. Please try again shortly.')
-  } finally { clearTimeout(timeout) }
+    if (error instanceof ApiError) throw new AuthError(error.message, error.errorCode, error.status)
+    throw new AuthError(AUTH_MESSAGES.connection)
+  }
 }

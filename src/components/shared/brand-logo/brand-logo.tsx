@@ -1,9 +1,10 @@
+import { APP_NAME } from '@/constants/strings'
 export function BrandLogo() {
     return (
         <span
             className="brand-logo"
             role="img"
-            aria-label="Legacy Wealth Cooperatives">
+            aria-label={APP_NAME}>
             <span className="brand-tree" aria-hidden="true">
                 <img
                     className="brand-tree-source"

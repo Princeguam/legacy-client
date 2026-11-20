@@ -474,6 +474,8 @@
 .dialog-layout {
     display: flex;
     flex-direction: column;
+    min-width: 0;
+    overflow-wrap: anywhere;
     gap: 16px;
     max-height: calc(100svh - 114px);
 }

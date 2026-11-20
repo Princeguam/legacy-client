@@ -1,7 +1,6 @@
+import type { ProductContextValue } from '@/types/workspace'
 import { createContext, useContext } from 'react'
-import type { AuthUser, UserRole } from '@/services/authService'
 
-export type ProductContextValue = { role: UserRole; preview: boolean; basePath: string; user: AuthUser | null }
 export const productContext = createContext<ProductContextValue | null>(null)
 export function useProduct() {
   const context = useContext(productContext)

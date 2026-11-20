@@ -1,25 +1,27 @@
+import { MONEY_DECIMAL_PLACES } from '@/constants/values'
+import { APP_CURRENCY, APP_LOCALE } from '@/constants/strings'
 export function formatCurrency(
     value: number,
-    currency = "NGN",
-    locale = "en-NG",
+    currency = APP_CURRENCY,
+    locale = APP_LOCALE,
 ) {
     return new Intl.NumberFormat(locale, {
         style: "currency",
         currency,
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2,
+        minimumFractionDigits: MONEY_DECIMAL_PLACES,
+        maximumFractionDigits: MONEY_DECIMAL_PLACES,
     }).format(value);
 }
 export function currencyAccessibleName(
     value: number,
-    currency = "NGN",
-    locale = "en-NG",
+    currency = APP_CURRENCY,
+    locale = APP_LOCALE,
 ) {
     return new Intl.NumberFormat(locale, {
         style: "currency",
         currency,
         currencyDisplay: "name",
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2,
+        minimumFractionDigits: MONEY_DECIMAL_PLACES,
+        maximumFractionDigits: MONEY_DECIMAL_PLACES,
     }).format(value);
 }

@@ -1,0 +1,101 @@
+.transactions-page {
+  grid-template-columns: minmax(0, 1fr);
+  overflow-wrap: anywhere;
+}
+
+.transactions-page .transaction-filters,
+.transactions-page .transaction-history,
+.transaction-filter-fields > .field {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.transaction-summary {
+  display: grid;
+  gap: var(--lwc-space-16);
+  min-width: 0;
+}
+
+.transactions-page .transaction-summary-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--lwc-space-16);
+}
+
+.transaction-commitment {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: center;
+  padding: var(--lwc-space-16);
+  gap: var(--lwc-space-16);
+}
+
+.transaction-commitment > div:first-child {
+  display: grid;
+  gap: var(--lwc-space-8);
+  min-width: 0;
+}
+
+.transaction-summary-note {
+  grid-column: 1 / -1;
+}
+
+.transaction-filters {
+  padding: var(--lwc-space-16);
+  gap: var(--lwc-space-16);
+}
+
+.transaction-filter-fields {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) repeat(4, minmax(0, 1fr));
+  align-items: start;
+  gap: var(--lwc-space-16);
+}
+
+.transaction-filter-fields > .field {
+  min-width: 0;
+}
+
+.transaction-filter-footer {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--lwc-space-8) var(--lwc-space-16);
+}
+
+@media (min-width: 960px) and (max-width: 1279px) {
+  .transaction-summary-grid .metric-value {
+    font-size: var(--lwc-type-heading-size);
+    line-height: var(--lwc-type-heading-line);
+  }
+}
+
+@media (max-width: 1279px) {
+  .transaction-filter-fields {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .transaction-filter-fields > .field:first-child {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 959px) {
+  .transactions-page .transaction-summary-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .transaction-filter-fields {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 599px) {
+  .transactions-page .transaction-summary-grid,
+  .transaction-commitment,
+  .transaction-filter-fields {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .transaction-filter-footer {
+    align-items: flex-start;
+  }
+}

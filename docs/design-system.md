@@ -51,6 +51,6 @@ npm run lint
 
 Only regenerate after an approved source/token change. Do not hand-edit generated CSS or the specification manifest. The checker reads `docs/design-system/agent-guide.md` and verifies guide/token consistency, generated output freshness, nine levels, spacing/radii/breakpoint/motion contracts, all 30 specifications, and 22 contrast pairs. Normal build retains this validation gate.
 
-Commit the generator, approved guide, normalized tokens, and generated outputs together. Update the full-guide appendix in `PROJECT_SCOPE.md` when an approved guide change occurs; keep the original boards/exports intact.
+Keep the generator, approved guide, normalized tokens, and generated outputs together in repository source. The owner manages Git commits. Update the full-guide appendix in `PROJECT_SCOPE.md` when an approved guide change occurs; keep the original boards/exports intact.
 
 Actual browser screenshots, keyboard/modal focus trapping, 320px reflow, 200% text resize, 400% zoom, reduced-motion, screen-reader, and forced-colours checks require a browser-capable environment. Chrome startup has been blocked here. Compilation, source/contrast checks, and DOM tests with mocked native dialog methods do not provide full runtime accessibility certification.

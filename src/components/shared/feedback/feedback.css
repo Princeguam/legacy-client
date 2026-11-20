@@ -1,0 +1,34 @@
+.feedback-page,
+.feedback-page > *,
+.feedback-details {
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+.feedback-screen,
+.feedback-list-page {
+    grid-template-columns: minmax(0, 1fr);
+    overflow-wrap: anywhere;
+}
+.feedback-details {
+    display: grid;
+    gap: var(--lwc-space-24);
+}
+.feedback-details .detail-list > div {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--lwc-space-8);
+}
+.feedback-details dd {
+    min-width: 0;
+}
+.feedback-sort {
+    width: min(100%, calc(var(--lwc-space-128) * 3));
+}
+.feedback-list-page {
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+.feedback-list-page .dialog-layout > h2,
+.feedback-list-page .dialog-layout > p {
+    overflow-wrap: anywhere;
+}

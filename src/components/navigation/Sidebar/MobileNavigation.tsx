@@ -1,3 +1,4 @@
+import { WORKSPACE_DESKTOP_MIN_WIDTH } from '@/constants/values'
 import { useEffect, useId, useRef } from 'react'
 import { X } from 'lucide-react'
 import { IconButton } from '@/components/shared/Button'
@@ -22,7 +23,7 @@ export function MobileNavigation({ open, onOpenChange }: { open: boolean; onOpen
   }, [open])
   useEffect(() => {
     if (!open || typeof window.matchMedia !== 'function') return
-    const desktop = window.matchMedia('(min-width: 960px)')
+    const desktop = window.matchMedia(`(min-width: ${WORKSPACE_DESKTOP_MIN_WIDTH}px)`)
     const closeOnDesktop = () => { if (desktop.matches) onOpenChange(false) }
     closeOnDesktop()
     desktop.addEventListener('change', closeOnDesktop)
